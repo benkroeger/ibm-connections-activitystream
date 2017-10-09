@@ -57,6 +57,30 @@ test.cb('loads event details', (t) => {
   });
 });
 
+test.cb('loads object history', (t) => {
+  const appItemId = 'urn:lsid:lconn.ibm.com:files.file:6b0164b3-92f0-41be-b621-b05dfac6d6fe';
+  const application = 'files';
+  const query = {
+    appItemId,
+    application,
+  };
+  const options = { authType: 'basic' };
+  service.objectHistory(query, options, (error, result) => {
+    t.ifError(error);
+
+    t.is(result.startIndex, 0);
+    t.is(result.totalResults, -1);
+    t.is(result.filtered, true);
+    t.is(result.itemsPerPage, 3);
+    t.is(result.sorted, true);
+    t.is(Array.isArray(result.list), true);
+    t.is(result.list.length, 3);
+    result.list.forEach(story => t.true([story.object.id, story.target.id].includes(appItemId)));
+
+    t.end();
+  });
+});
+
 test.cb('loads activitystream for community', (t) => {
   const communityId = 'fce37a1b-43d0-41c9-b5d8-80aa6b86c852';
   const query = { communityId };
@@ -72,8 +96,8 @@ test.cb('loads activitystream for community', (t) => {
     t.is(result.sorted, true);
     t.is(Array.isArray(result.list), true);
     t.is(result.list.length, 20);
-
     result.list.forEach(story => t.true(story.url && story.url.includes(communityId)));
+
     t.end();
   });
 });
